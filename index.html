@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$CYBERLEEK</title>
+<style>
+  :root{
+    --bg:#040814;
+    --bg2:#060c1f;
+    --panel:#071233;
+    --panel-line:#123a8f;
+    --blue:#3d7dff;
+    --cyan:#4fb8ff;
+    --leek:#7CFC00;
+    --leek-dim:#3aa60a;
+    --text:#9fb8e8;
+    --muted:#4a5f8a;
+    --glow-blue:0 0 12px rgba(61,125,255,.55);
+    --glow-leek:0 0 14px rgba(124,252,0,.5);
+    --mono:'Courier New',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -200px,rgba(61,125,255,.10),transparent 70%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--text);
+    font-family:var(--mono);
+    letter-spacing:.5px;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  /* faint grid */
+  body::before{
+    content:"";
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(61,125,255,.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(61,125,255,.045) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask:radial-gradient(circle at 50% 30%,#000 40%,transparent 90%);
+  }
+  /* scanlines */
+  body::after{
+    content:"";position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0 1px,transparent 1px 3px);
+    opacity:.35;
+  }
+  .wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:0 18px 80px}
+
+  /* NAV */
+  nav{display:flex;gap:12px;padding:22px 4px 8px}
+  .nav-btn{
+    border:1px solid var(--panel-line);
+    background:rgba(7,18,51,.6);
+    color:var(--cyan);
+    padding:9px 16px;font-family:var(--mono);font-size:12px;letter-spacing:2px;
+    text-decoration:none;text-transform:uppercase;transition:.15s;cursor:pointer;
+  }
+  .nav-btn:hover{border-color:var(--blue);box-shadow:var(--glow-blue);color:#fff}
+  .nav-btn.leek{color:var(--leek);border-color:var(--leek-dim)}
+  .nav-btn.leek:hover{border-color:var(--leek);box-shadow:var(--glow-leek);color:#fff}
+
+  /* HERO */
+  header{text-align:center;padding:38px 0 18px}
+  .avatar{
+    width:196px;height:196px;margin:0 auto 26px;border-radius:50%;
+    border:2px solid var(--blue);
+    background:radial-gradient(circle at 50% 40%,#0a1c4d,#040a1e 75%);
+    box-shadow:var(--glow-blue),inset 0 0 40px rgba(61,125,255,.25);
+    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+    animation:float 5s ease-in-out infinite;
+  }
+  @keyframes float{50%{transform:translateY(-10px)}}
+  .avatar svg{width:150px;height:150px}
+  .logo-img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  h1{
+    font-size:clamp(42px,9vw,80px);margin:6px 0 12px;letter-spacing:6px;
+    color:var(--cyan);text-shadow:var(--glow-blue);font-weight:700;
+    position:relative;
+  }
+  h1 .glitch{position:relative;display:inline-block}
+  h1 .glitch::before,h1 .glitch::after{
+    content:"$CYBERLEEK";position:absolute;left:0;top:0;width:100%;overflow:hidden;
+  }
+  h1 .glitch::before{color:#ff3b6b;animation:g1 3s infinite steps(2);clip-path:inset(0 0 60% 0)}
+  h1 .glitch::after{color:var(--leek);animation:g2 2.4s infinite steps(2);clip-path:inset(60% 0 0 0)}
+  @keyframes g1{0%,92%,100%{transform:translate(0);opacity:0}93%{transform:translate(-3px);opacity:.7}96%{transform:translate(2px);opacity:.7}}
+  @keyframes g2{0%,90%,100%{transform:translate(0);opacity:0}91%{transform:translate(3px);opacity:.7}97%{transform:translate(-2px);opacity:.7}}
+  .tagline{color:var(--text);font-size:13px;letter-spacing:2px;margin:2px 0}
+  .tagline .sep{color:var(--muted)}
+  .status{color:var(--leek);font-size:13px;letter-spacing:3px;text-shadow:var(--glow-leek)}
+  .cursor{display:inline-block;width:9px;height:15px;background:var(--leek);margin-left:3px;
+    vertical-align:middle;animation:blink 1s steps(1) infinite;box-shadow:var(--glow-leek)}
+  @keyframes blink{50%{opacity:0}}
+  .divider{height:1px;margin:26px 0;background:linear-gradient(90deg,transparent,var(--blue) 30%,var(--leek) 70%,transparent)}
+
+  /* CTA ROW */
+  .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:28px 0 6px}
+  .btn{
+    font-family:var(--mono);font-size:15px;letter-spacing:2px;text-transform:uppercase;
+    padding:16px 30px;text-decoration:none;cursor:pointer;position:relative;
+    border:1px solid;transition:.16s;display:inline-flex;align-items:center;gap:10px;
+  }
+  .btn-download{color:#04140a;background:var(--leek);border-color:var(--leek);box-shadow:var(--glow-leek);font-weight:700}
+  .btn-download:hover{background:#a2ff36;box-shadow:0 0 26px rgba(124,252,0,.75);transform:translateY(-2px)}
+  .btn-buy{color:var(--cyan);background:rgba(7,18,51,.7);border-color:var(--blue);box-shadow:var(--glow-blue)}
+  .btn-buy:hover{color:#fff;background:#0e2159;box-shadow:0 0 26px rgba(61,125,255,.75);transform:translateY(-2px)}
+
+  /* PANEL */
+  .panel{border:1px solid var(--panel-line);background:rgba(7,18,51,.55);margin:18px 0;
+    box-shadow:inset 0 0 30px rgba(10,28,77,.4)}
+  .panel.hot{border-color:var(--leek-dim);box-shadow:var(--glow-leek),inset 0 0 30px rgba(10,28,77,.4)}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;
+    padding:14px 18px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan)}
+  .panel-head .dot{color:var(--leek);margin-right:8px}
+  .panel-head .arw{color:var(--muted)}
+  .panel-body{padding:6px 18px 20px}
+
+  /* CA */
+  .ca-panel{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    border:1px solid var(--panel-line);background:rgba(7,18,51,.7);padding:16px 18px;margin:22px 0}
+  .ca-label{color:var(--cyan);font-weight:700;letter-spacing:2px}
+  .ca-val{color:var(--blue);word-break:break-all;flex:1;min-width:200px;font-size:14px}
+  .copy-btn{border:1px solid var(--panel-line);background:transparent;color:var(--cyan);
+    font-family:var(--mono);padding:9px 18px;letter-spacing:2px;cursor:pointer;transition:.15s;text-transform:uppercase;font-size:12px}
+  .copy-btn:hover{border-color:var(--leek);color:var(--leek);box-shadow:var(--glow-leek)}
+
+  /* stat grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .cell{border:1px solid var(--panel-line);padding:16px 16px 18px;background:rgba(4,10,30,.5)}
+  .cell h3{margin:0 0 12px;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;font-weight:400}
+  .big{font-size:30px;color:var(--cyan);text-shadow:var(--glow-blue)}
+  .cell p{margin:5px 0;font-size:13px}
+  .ok{color:var(--leek)}
+  .val{color:var(--cyan)}
+
+  /* trade links */
+  .trade{display:flex;gap:12px;flex-wrap:wrap}
+  .trade a{flex:1;min-width:120px;text-align:center;border:1px solid var(--panel-line);
+    color:var(--cyan);text-decoration:none;padding:14px 6px;font-size:12px;letter-spacing:2px;
+    transition:.15s;text-transform:uppercase;background:rgba(4,10,30,.5)}
+  .trade a:hover{border-color:var(--blue);box-shadow:var(--glow-blue);color:#fff}
+
+  /* leek feed */
+  .leek-item{border:1px solid var(--panel-line);background:rgba(4,10,30,.45);padding:16px 18px;margin:12px 0}
+  .leek-item h4{margin:0 0 12px;color:var(--cyan);letter-spacing:2px;font-size:17px}
+  .mirror{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--panel-line);
+    color:var(--cyan);text-decoration:none;padding:9px 16px;font-size:12px;letter-spacing:2px;transition:.15s;text-transform:uppercase}
+  .mirror:hover{border-color:var(--leek);color:var(--leek);box-shadow:var(--glow-leek)}
+
+  footer{text-align:center;margin-top:44px;color:var(--muted);font-size:11px;letter-spacing:2px;line-height:1.9}
+  footer .l{color:var(--leek)}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(30px);
+    background:var(--leek);color:#04140a;padding:12px 26px;font-family:var(--mono);font-weight:700;
+    letter-spacing:2px;box-shadow:var(--glow-leek);opacity:0;transition:.25s;z-index:20;pointer-events:none;text-transform:uppercase;font-size:13px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}.btn{width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="nav-btn" href="#home">◆ Home</a>
+    <a class="nav-btn" href="#about">◆ About</a>
+    <a class="nav-btn leek" href="#download">▾ GTA 6</a>
+  </nav>
+
+  <header id="home">
+    <div class="avatar">
+      <img src="logo.jpg" alt="$CYBERLEEK" class="logo-img">
+    </div>
+    <h1><span class="glitch">$CYBERLEEK</span></h1>
+    <p class="tagline">community voting <span class="sep">·</span> decentralized leeks <span class="sep">·</span> no wallet connect</p>
+    <p class="status">system online<span class="cursor"></span></p>
+
+    <div class="cta-row">
+      <a class="btn btn-download" href="https://telegram.org" target="_blank" rel="noopener">▾ Download GTA 6</a>
+      <a class="btn btn-buy" href="https://jup.ag/swap/SOL-ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg" target="_blank" rel="noopener">◆ Buy $CYBERLEEK</a>
+    </div>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- CONTRACT -->
+  <div class="ca-panel">
+    <span class="ca-label">CA:</span>
+    <span class="ca-val" id="ca">ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg</span>
+    <button class="copy-btn" onclick="copyCA()">Copy</button>
+  </div>
+
+  <!-- TOKEN INFO -->
+  <section class="panel" id="about">
+    <div class="panel-head"><span><span class="dot">■</span>$CYBERLEEK · Token Info</span><span class="arw">▾</span></div>
+    <div class="panel-body">
+      <div class="grid">
+        <div class="cell">
+          <h3>Total Supply</h3>
+          <div class="big">1B</div>
+          <p style="color:var(--muted)">$CYBERLEEK</p>
+        </div>
+        <div class="cell">
+          <h3>Security</h3>
+          <p><span class="ok">LP Burned ✓</span></p>
+          <p><span class="ok">Mint Revoked ✓</span></p>
+          <p><span class="ok">Freeze Revoked ✓</span></p>
+        </div>
+        <div class="cell">
+          <h3>Taxes</h3>
+          <p>Buy: <span class="val">0%</span></p>
+          <p>Sell: <span class="val">0%</span></p>
+          <p style="color:var(--muted)">chain: Solana</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRADE -->
+  <section class="panel">
+    <div class="panel-head"><span><span class="dot">■</span>Trade $CYBERLEEK</span><span class="arw">▾</span></div>
+    <div class="panel-body">
+      <div class="trade">
+        <a href="https://jup.ag/swap/SOL-ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg" target="_blank" rel="noopener">Jupiter</a>
+        <a href="https://raydium.io/swap/?inputMint=sol&outputMint=ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg" target="_blank" rel="noopener">Raydium</a>
+        <a href="https://dexscreener.com/solana/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg" target="_blank" rel="noopener">Dexscreener</a>
+        <a href="https://birdeye.so/token/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg?chain=solana" target="_blank" rel="noopener">Birdeye</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section class="panel hot" id="download">
+    <div class="panel-head"><span><span class="dot">■</span>Download GTA 6</span><span class="arw">▾</span></div>
+    <div class="panel-body">
+      <p style="color:var(--leek);font-size:14px;line-height:1.8;margin-top:10px;text-shadow:var(--glow-leek)">
+        > As promised, the GTA 6 leak is here.
+      </p>
+      <p style="color:var(--text);font-size:13px;line-height:1.8;margin-top:6px">
+        > Leaked build, decrypted by the $CYBERLEEK network. No wallet connect required.
+      </p>
+      <div class="cta-row" style="justify-content:flex-start;margin-top:16px">
+        <a class="btn btn-download" href="https://telegram.org" target="_blank" rel="noopener">▾ Download GTA 6</a>
+        <a class="btn btn-buy" href="https://jup.ag/swap/SOL-ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg" target="_blank" rel="noopener">◆ Buy on Jupiter</a>
+      </div>
+      <p style="color:var(--muted);font-size:11px;margin-top:14px">build v1.0.0 · win / mac / linux · sha verified</p>
+    </div>
+  </section>
+
+  <!-- LEEKS FEED -->
+  <section class="panel">
+    <div class="panel-head"><span><span class="dot">■</span>Leeks</span><span class="arw">▾</span></div>
+    <div class="panel-body">
+      <div class="leek-item">
+        <h4>GTA 6: PROLOGUE 1</h4>
+        <a class="mirror" href="#">▸ lufi.ethibox.fr mirror 1</a>
+      </div>
+      <div class="leek-item">
+        <h4>$CYBERLEEK ROADMAP LEAK</h4>
+        <a class="mirror" href="#">▸ node.cyberleek.sys mirror 2</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>$CYBERLEEK <span class="l">//</span> decentralized leeks on solana <span class="l">//</span> system online</div>
+    <div>not financial advice · community driven · <span class="l">$CYBERLEEK</span></div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast">✓ CA copied</div>
+
+<script>
+function copyCA(){
+  const ca="ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg";
+  navigator.clipboard.writeText(ca).then(showToast).catch(()=>{
+    const t=document.createElement('textarea');t.value=ca;document.body.appendChild(t);t.select();
+    document.execCommand('copy');t.remove();showToast();
+  });
+}
+function showToast(msg){
+  const el=document.getElementById('toast');
+  if(msg) el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),1600);
+}
+function dl(e){
+  e.preventDefault();
+  showToast('▾ build launching soon');
+  return false;
+}
+</script>
+</body>
+</html>
