@@ -59,6 +59,7 @@ try {
     snipePresignMs: Math.max(200, Number(process.env.SNIPE_PRESIGN_MS || 1200)),
     snipeOffsetMs: Number(process.env.SNIPE_OFFSET_MS || 30),
     snipeFeeMult: Math.max(1, Number(process.env.SNIPE_FEE_MULT || 2)),
+    snipePriorityGwei: Math.max(0, Number(process.env.SNIPE_PRIORITY_GWEI || 0)),
     snipeMopupMs: Math.max(0, Number(process.env.SNIPE_MOPUP_MS || 8000)),
     snipeUseRpcClock: (process.env.SNIPE_USE_RPC_CLOCK || 'false').trim().toLowerCase() === 'true',
     snipeMinZero: (process.env.SNIPE_MIN_ZERO || 'false').trim().toLowerCase() === 'true',
@@ -334,8 +335,12 @@ async function armSnipe(boundarySec) {
   }
 
   const base = fees.maxFeePerGas ?? fees.gasPrice ?? 0n;
-  const maxFee = (base * BigInt(Math.round(cfg.snipeFeeMult * 100))) / 100n;
-  const prio = fees.maxPriorityFeePerGas ?? 0n;
+  // Tip explicite (gwei) — le RPC suggère 0 sur cette chaîne, donc sans ce réglage
+  // aucun tip n'était jamais réellement envoyé malgré SNIPE_FEE_MULT (qui ne monte
+  // que le plafond maxFee, pas le tip payé). maxFee doit couvrir base + tip.
+  const prio = ethers.parseUnits(String(cfg.snipePriorityGwei), 9);
+  const maxFee0 = (base * BigInt(Math.round(cfg.snipeFeeMult * 100))) / 100n;
+  const maxFee = maxFee0 > prio ? maxFee0 : prio + base;
 
   const plan = [];
   let n = nonce;
@@ -359,7 +364,7 @@ async function armSnipe(boundarySec) {
   if (plan.length === 0) { log('   SNIPE: aucune tranche valide à signer.'); snipeState = null; return; }
   snipeState = { boundary: boundarySec, plan, fired: false };
   log(`   🎯 SNIPE armé pour ${new Date(boundarySec * 1000).toISOString().slice(11, 19)} UTC — ${plan.length} tx pré-signées, nonces ${plan[0].nonce}..${plan[plan.length - 1].nonce}`);
-  log(`      échelle: ${plan.map((x) => fmt(x.amt, ROBIN_DECIMALS, 0)).join(' → ')} ROBIN | maxFee ${fmt(maxFee, 9, 3)} gwei (x${cfg.snipeFeeMult}) | prix ${fmt(price, 18, 6)}`);
+  log(`      échelle: ${plan.map((x) => fmt(x.amt, ROBIN_DECIMALS, 0)).join(' → ')} ROBIN | maxFee ${fmt(maxFee, 9, 3)} gwei | tip ${fmt(prio, 9, 3)} gwei | prix ${fmt(price, 18, 6)}`);
   warmSequencer(); // ouvre/garde chaude la connexion TLS au séquenceur pour le tir
 }
 
@@ -570,7 +575,7 @@ async function main() {
   log(`   POLL: ${cfg.pollMs} ms — course ${cfg.pollFastMs} ms de T-20 s à T+10 s (nettoyage des restes)`);
   if (cfg.snipe) {
     log(`   SNIPE: ✅ ACTIF — pré-signe à T-${cfg.snipePresignMs} ms, tire à T+${cfg.snipeOffsetMs} ms`);
-    log(`          échelle ${cfg.snipeLadder.map((a) => fmt(a, ROBIN_DECIMALS, 0)).join('/')} ROBIN | feeMult x${cfg.snipeFeeMult} | minUsdg ${cfg.snipeMinZero ? '0 (aucun)' : `slippage ${cfg.slippageBps} bps`}`);
+    log(`          échelle ${cfg.snipeLadder.map((a) => fmt(a, ROBIN_DECIMALS, 0)).join('/')} ROBIN | feeMult x${cfg.snipeFeeMult} | tip ${cfg.snipePriorityGwei} gwei | minUsdg ${cfg.snipeMinZero ? '0 (aucun)' : `slippage ${cfg.slippageBps} bps`}`);
     log(`          diffusion via séquenceur direct: ${cfg.sequencerUrl}`);
   } else {
     log('   SNIPE: désactivé (SNIPE=true pour l’activer)');
