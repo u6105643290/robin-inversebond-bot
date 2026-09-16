@@ -27,13 +27,12 @@ const cfg = {
   dryRun: (process.env.SNIPE_DRY_RUN ?? 'true').trim().toLowerCase() !== 'false',
   usdgIn: ethers.parseUnits((process.env.SNIPE_USDG_IN || '500').trim(), USDG_DECIMALS),
   minRobinOut: ethers.parseUnits((process.env.SNIPE_MIN_ROBIN_OUT || '35').trim(), ROBIN_DECIMALS),
-  spamMs: Math.max(40, Number(process.env.SNIPE_SPAM_MS || 120)),
-  batchSize: Math.max(2, Number(process.env.SNIPE_BATCH || 25)),
-  maxInFlight: Math.max(1, Number(process.env.SNIPE_MAX_INFLIGHT || 2)),
+  spamMs: Math.max(10, Number(process.env.SNIPE_SPAM_MS || 40)),
+  batchSize: Math.max(2, Number(process.env.SNIPE_BATCH || 60)),
   gasLimit: BigInt(process.env.SNIPE_GAS_LIMIT || 800000),
   priorityGwei: Number(process.env.SNIPE_PRIORITY_GWEI || 0),
   feeMult: Math.max(1, Number(process.env.SNIPE_FEE_MULT || 3)),
-  maxSpend: ethers.parseEther(process.env.SNIPE_MAX_GAS_SPEND || '0.03'), // garde-fou gas total
+  maxSpend: ethers.parseEther(process.env.SNIPE_MAX_GAS_SPEND || '0.05'), // garde-fou gas total
 };
 
 const provider = new ethers.JsonRpcProvider(cfg.rpcUrl, CHAIN_ID, { staticNetwork: true });
@@ -130,7 +129,7 @@ async function main() {
   log(`mode      : ${cfg.dryRun ? 'DRY_RUN (aucune tx envoyee)' : '🔥 LIVE'}`);
   log(`wallet    : ${wallet.address}`);
   log(`achat     : ${ethers.formatUnits(cfg.usdgIn, USDG_DECIMALS)} USDG -> min ${ethers.formatUnits(cfg.minRobinOut, ROBIN_DECIMALS)} ROBIN (apres taxe 5%)`);
-  log(`cadence   : 1 tx / ${cfg.spamMs} ms | max ${cfg.maxInFlight} en vol | gasLimit ${cfg.gasLimit}`);
+  log(`cadence   : 1 tx / ${cfg.spamMs} ms (~${Math.round(60000 / cfg.spamMs)} tx/min) | gasLimit ${cfg.gasLimit}`);
   log(`garde-fou : arret si plus de ${ethers.formatEther(cfg.maxSpend)} de gas consomme`);
 
   // --- verifications de securite avant de commencer ---
