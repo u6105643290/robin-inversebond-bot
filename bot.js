@@ -15,12 +15,21 @@ const ROBIN_UNIT = 10n ** BigInt(ROBIN_DECIMALS);
 const BPS = 10_000n;
 const GAS_LIMIT = 400_000n;
 
+// Adresses surchargeables par .env pour faire tourner une instance V1 et une V2
+// avec la meme base de code. Defauts = V1, donc l'instance existante ne bouge pas.
 const ADDR = {
-  inverseBond: '0xE2a4E905C486de90e82587de66107f77DEb0F6Ca',
-  treasury: '0x928b2B18a5d2622336F1b7c9Cf8dEff5D651E9bF',
-  oracle: '0xB4644661d788C4bB1FF13C3EC22CCcdee36C5A37',
-  robin: '0x31359C4eFaa272C78fC1e08F49d9A59dc510aEbA',
+  inverseBond: process.env.INVERSE_BOND_ADDRESS || '0xE2a4E905C486de90e82587de66107f77DEb0F6Ca',
+  treasury: process.env.TREASURY_ADDRESS || '0x928b2B18a5d2622336F1b7c9Cf8dEff5D651E9bF',
+  oracle: process.env.ORACLE_ADDRESS || '0xB4644661d788C4bB1FF13C3EC22CCcdee36C5A37',
+  robin: process.env.ROBIN_ADDRESS || '0x31359C4eFaa272C78fC1e08F49d9A59dc510aEbA',
 };
+const NETWORK_LABEL = process.env.NETWORK_LABEL || 'V1';
+// Valide les checksums tout de suite: une adresse mal casee ferait echouer le bot
+// silencieusement au premier appel plutot qu'au demarrage.
+for (const [k, v] of Object.entries(ADDR)) {
+  try { ADDR[k] = ethers.getAddress(v); }
+  catch { console.error(`Adresse invalide pour ${k}: ${v}`); process.exit(1); }
+}
 
 const inverseBondAbi = [
   'function capacityRaw() view returns (uint256)',
@@ -568,7 +577,9 @@ async function pollLoop() {
 }
 
 async function main() {
-  log('🤖 Bot de rachat ROBIN via InverseBond — démarrage (heures en UTC)');
+  log(`🤖 Bot de rachat ROBIN [${NETWORK_LABEL}] via InverseBond — démarrage (heures en UTC)`);
+  log(`   contrats: bond ${ADDR.inverseBond} | treasury ${ADDR.treasury}`);
+  log(`             oracle ${ADDR.oracle} | token ${ADDR.robin}`);
   log(`   mode: ${cfg.dryRun ? 'DRY_RUN (aucune transaction ne sera envoyée)' : '🔥 LIVE — les dépôts seront envoyés'}`);
   log(`   wallet: ${wallet.address}${rawKey ? '' : ' (clé factice aléatoire — PRIVATE_KEY absente)'}`);
   log(`   rpc: ${cfg.rpcUrl}`);
